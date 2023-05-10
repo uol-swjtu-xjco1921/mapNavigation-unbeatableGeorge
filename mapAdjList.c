@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,7 @@ void init_adjacency_list(AdjacencyList* adj_list)
 {
     adj_list->num_points = 0;
     adj_list->num_edges = 0;
+    adj_list->num_edit = 0;
     adj_list->points = NULL;
     adj_list->adj = NULL;
     adj_list->adj_len = NULL;
@@ -39,7 +41,8 @@ void add_point_to_adjacency_list(AdjacencyList* adj_list, long long id, double l
     // Hash table
     if (hashtable_lookup(adj_list->point_hash, id) != -1)
     {
-        fprintf(stderr, "Error: Duplicated point ID %lld\n", id);
+        printf("Duplicated point ID %lld\n", id);
+        free_adjacency_list(adj_list);
         exit(1);
     }
 
@@ -53,7 +56,8 @@ void add_point_to_adjacency_list(AdjacencyList* adj_list, long long id, double l
         if (adj_list->points == NULL || adj_list->adj == NULL || adj_list->adj_len == NULL)
         {
             printf("malloc failed");
-            exit(0);
+            free_adjacency_list(adj_list);
+            exit(1);
         }
     }
     else
@@ -64,7 +68,8 @@ void add_point_to_adjacency_list(AdjacencyList* adj_list, long long id, double l
         if (adj_list->points == NULL || adj_list->adj == NULL || adj_list->adj_len == NULL)
         {
             printf("malloc failed");
-            exit(0);
+            free_adjacency_list(adj_list);
+            exit(1);
         }
     }
 
@@ -82,7 +87,8 @@ void add_edge_to_adjacency_list(AdjacencyList* adj_list, long long id, long long
 {
     if (hashtable_lookup(adj_list->point_hash, from) == -1 || hashtable_lookup(adj_list->point_hash, to) == -1)
     {
-        fprintf(stderr, "Error: Invalid edge (%lld, %lld)\n", from, to);
+        printf("Error: Invalid edge (%lld, %lld)\n", from, to);
+        free_adjacency_list(adj_list);
         exit(1);
     }
 
@@ -92,7 +98,8 @@ void add_edge_to_adjacency_list(AdjacencyList* adj_list, long long id, long long
         if (adj_list->edges == NULL)
         {
             printf("malloc failed");
-            exit(0);
+            free_adjacency_list(adj_list);
+            exit(1);
         }
     }
     else
@@ -101,10 +108,12 @@ void add_edge_to_adjacency_list(AdjacencyList* adj_list, long long id, long long
         if (adj_list->edges == NULL)
         {
             printf("malloc failed");
-            exit(0);
+            free_adjacency_list(adj_list);
+            exit(1);
         }
     }
 
+    /* 存入边的信息到edges中 */
     adj_list->edges[adj_list->num_edges].id = id;
     adj_list->edges[adj_list->num_edges].from = from;
     adj_list->edges[adj_list->num_edges].to = to;
@@ -119,7 +128,8 @@ void add_edge_to_adjacency_list(AdjacencyList* adj_list, long long id, long long
     if (adj_list->adj[from_index] == NULL)
     {
         printf("malloc failed");
-        exit(0);
+        free_adjacency_list(adj_list);
+        exit(1);
     }
 
     adj_list->adj[from_index][adj_list->adj_len[from_index]] = adj_list->num_edges;
@@ -129,7 +139,8 @@ void add_edge_to_adjacency_list(AdjacencyList* adj_list, long long id, long long
     if (adj_list->adj[to_index] == NULL)
     {
         printf("malloc failed");
-        exit(0);
+        free_adjacency_list(adj_list);
+        exit(1);
     }
 
     adj_list->adj[to_index][adj_list->adj_len[to_index]] = adj_list->num_edges;

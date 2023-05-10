@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,15 +12,12 @@ int read_map(AdjacencyList* adj_list)
 {
     const char filename[] = "leeds.map";
     /* Read the data file and transform it into an adjacency list */
-    read_points(filename, adj_list);
+    read_points(&filename, adj_list);
 
-    read_edges(filename, adj_list);
+    read_edges(&filename, adj_list);
 
     /* Print the adjacency list */
     print_adjacency_list(adj_list);
-
-    /* Free the memory used by the adjacency list */
-    free_adjacency_list(adj_list);
 
     return 0;
 }
@@ -60,7 +58,8 @@ void read_points(const char* filename, AdjacencyList* adj_list)
                 fprintf(stderr, "Error: Failed to parse node data in %d line\n", count);
                 exit(1);
             }
-            add_point_to_adjacency_list(adj_list, id, lat, lon);  // Add the point to the adjacency list
+            // Add the point to the adjacency list
+            add_point_to_adjacency_list(adj_list, id, lat, lon);
         }
         count++;
         memset(line, 0, sizeof(line));
@@ -98,7 +97,7 @@ void read_edges(const char* filename, AdjacencyList* adj_list)
                 fprintf(stderr, "Error: Failed to parse link data in %d\n", count);
                 exit(1);
             }
-            add_edge_to_adjacency_list(adj_list, link_id, node_id_from, node_id_to, length);
+            add_edge_to_adjacency_list(adj_list, link_id, node_id_from, node_id_to, length); // 将该link添加到邻接表中
         }
         count++;
     }
