@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "hashTable.h"
-#include "mapAdjList.h"
+#include "mapAdjMatrix.h"
 #include "mapReader.h"
 #include "mapEditor.h"
 #include "pathFinder.h"
@@ -13,7 +13,7 @@
 /* XJCO 1921M Programming Project  */
 /* 2022-23 Spring Semester         */
 /*                                 */
-/* Version: Store data in adj list */
+/* Version: Store data in adj matrix */
 /* Yifan Xiang					   */
 /***********************************/
 
@@ -23,53 +23,19 @@
 
 int main()
 {
-    AdjacencyList adj_list; // Define an adjacency list variable
-    
-    init_adjacency_list(&adj_list); // Initialize the adjacency list
+    AdjacencyMatrix adj_matrix; // Define an adjacency matrix variable
 
-    int result = read_map(&adj_list);
-                                        
-    result = ask_modify_map(&adj_list);    // modify_map
+    init_adjacency_matrix(&adj_matrix); // Initialize the adjacency matrix
+
+    int result = read_map(&adj_matrix);
+
+    result = ask_modify_map(&adj_matrix);    // modify_map
     if (result == 1)
     {
-        printf("\n修改次数 %d", adj_list.num_edit);
+        printf("\n修改次数 %d\n", adj_matrix.num_edit);
     }
 
-    double** p;
-    p = (double**)malloc(sizeof(double*) * N);
-    for (int i = 0; i < N; i++) {
-        p[i] = (double*)malloc(sizeof(double) * N);
-        for (int j = 0; j < N; j++) {
-            p[i][j] = INF;
-        }
-    }
-    int n = adj_list.num_points;
-    int m = adj_list.num_edges;
-    int a, b;
-    double c;
-    for (int i = 0; i < m; i++)
-    {
-        a = hashtable_lookup(adj_list.point_hash, adj_list.edges[i].from);
-        b = hashtable_lookup(adj_list.point_hash, adj_list.edges[i].to);
-        c = adj_list.edges[i].length;
-        p[a][b] = min(p[a][b], c);
-        p[b][a] = min(p[b][a], c);
-    }
-    for (int i = 0; i < m; i++)
-    {
-        p[i][i] = 0;
-    }
-    int start = 0;
-    int end = 0;
-    scanf("%d", &start);
-    scanf("%d", &end);
-    start = hashtable_lookup(adj_list.point_hash, start);
-    end = hashtable_lookup(adj_list.point_hash, end);
-    dijkstra(start, end, n, m, p);
-    for (int i = 0; i < N; i++) {
-        free(p[i]);
-    }
-    free(p);
+    result = ask_find_path(&adj_matrix);
     return 0;
 
     return 0;

@@ -29,7 +29,7 @@ all: $(EXE)
 # But as you refactor and add more .c and .h files
 # These recipes will become more complex.
 
-main: main.o hashTable.o mapAdjList.o mapReader.o
+main: main.o hashTable.o mapAdjMatrix.o mapReader.o mapEditor.c pathFinder.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Clean removes all object files and executables

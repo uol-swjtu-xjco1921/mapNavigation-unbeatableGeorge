@@ -9,5 +9,5 @@ typedef struct hash_table_t {
 
 void init_hashtable(HashTable* hashtable);
 void free_hashtable(HashTable* hashtable);
-void hashtable_add(HashTable* hashtable, long long key, int value);
+int hashtable_add(HashTable* hashtable, long long key, int value);
 int hashtable_lookup(HashTable* hashtable, long long key);

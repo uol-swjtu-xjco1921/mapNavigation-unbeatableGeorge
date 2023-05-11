@@ -1,9 +1,9 @@
 #ifndef PATH_FINDER_H_INCLUDED
 #define PATH_FINDER_H_INCLUDED
 
-#define N 4000
 #define INF 9999
 
-void dijkstra(int start, int end, int n, int m, double** p);
+void dijkstra(AdjacencyMatrix* adj_matrix, int start, int end);
+int ask_find_path(AdjacencyMatrix* adj_matrix);
 
 #endif // PATH_FINDER_H_INCLUDED
