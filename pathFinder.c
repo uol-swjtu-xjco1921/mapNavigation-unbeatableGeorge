@@ -252,7 +252,6 @@ int ask_location_POI(AdjacencyMatrix* adj_matrix, long long* location, int* POI)
 
     int flag = 0; // 标志位，表示是否成功读入输入数据
     char buf[100]; // 定义一个缓冲区
-    int len = 0;
     switch (operate_type)
     {
         case 1:
@@ -313,7 +312,7 @@ int ask_location_POI(AdjacencyMatrix* adj_matrix, long long* location, int* POI)
                     printf("输入错误！重新输入!\n");
                     continue;
                 }
-                sscanf(buf, "%ld", POI);
+                sscanf(buf, "%d", POI);
                 // 查看点是否存在(这里用了一个合法的坐标)
                 //int result = is_POI_exist(adj_matrix, *location, *POI);
 
@@ -326,6 +325,7 @@ int ask_location_POI(AdjacencyMatrix* adj_matrix, long long* location, int* POI)
             }
             return POINT_OF_INTEREST;
     }
+    return FUNCTION_SUCCESS;
 }
 
 

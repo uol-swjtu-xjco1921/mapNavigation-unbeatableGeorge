@@ -611,7 +611,7 @@ int is_node_exist(AdjacencyMatrix* adj_matrix, long long node_id)
 
 int is_POI_exist(AdjacencyMatrix* adj_matrix, int POI)
 {
-
+    return 0;
 }
 
 // 检查一个数是不是long long

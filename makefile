@@ -9,6 +9,8 @@ CC = gcc
 # This is a good idea when code quality is important
 # -g enables the use of GDB
 CFLAGS = -std=c99 -Wall -Werror -g
+CFLAGS += -I/usr/include/SDL2
+LDFLAGS += -L/usr/lib64/ -lSDL2 -lSDL2_mixer -lSDL2_ttf
 
 # This is your list of executables which you want to compile with all
 EXE = main
@@ -29,8 +31,8 @@ all: $(EXE)
 # But as you refactor and add more .c and .h files
 # These recipes will become more complex.
 
-main: main.o hashTable.o mapAdjMatrix.o mapReader.o mapEditor.c pathFinder.c
-	$(CC) $(CFLAGS) $^ -o $@
+main: main.o hashTable.o mapAdjMatrix.o mapReader.o mapEditor.c pathFinder.c pathVisualizer.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) -lm
 
 # Clean removes all object files and executables
 # Do not under any circumstances add .c or .h files

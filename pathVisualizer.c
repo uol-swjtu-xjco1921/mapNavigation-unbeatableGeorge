@@ -6,15 +6,16 @@
 
 #include "hashTable.h"
 #include "mapAdjMatrix.h"
+#include "mapError.h"
 #include "mapReader.h"
 #include "mapEditor.h"
 #include "pathFinder.h"
+#include "pathVisualizer.h"
 
 // 定义地球半径为常量，单位 km
 const double EARTH_RADIUS = 6371.0;
 //定义结点结构体
 SDL_Rect* graphicPoints;
-int** g;//邻接矩阵方式
 SDL_Window* window;
 SDL_Renderer* renderer;
 
@@ -58,7 +59,8 @@ void init(AdjacencyMatrix* adj_matrix,int *w_window, int *h_window)
 	}
 }
 
-void quit() {//销毁所有堆中的数据，避免内存溢出
+void quit() 
+{ //销毁所有堆中的数据，避免内存溢出
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	free(graphicPoints);
@@ -123,22 +125,12 @@ void render(AdjacencyMatrix* adj_matrix, int* path)
 	SDL_Delay(100000);
 }
 
-int main() {
-	AdjacencyMatrix adj_matrix; // Define an adjacency matrix variable
-
-	init_adjacency_matrix(&adj_matrix); // Initialize the adjacency matrix
-
-	int result = read_map(&adj_matrix);
-
-	int* path = NULL;
-	path = (int*)malloc(sizeof(int) * (adj_matrix.num_points)); // 分配内存空间
-	memset(path, -1, sizeof(int) * adj_matrix.num_points);
-	result = ask_find_path(&adj_matrix, path);
+int visualize(AdjacencyMatrix* adj_matrix, int* path)
+{
 	int w_window = 0.0;
 	int h_window = 0.0;
-	init(&adj_matrix, &w_window, &h_window);
-	render(&adj_matrix, path);
+	init(adj_matrix, &w_window, &h_window);
+	render(adj_matrix, path);
 	quit();
-	free(path); // 释放动态分配的内存空间
-	return 0;
+	return FUNCTION_SUCCESS;
 }

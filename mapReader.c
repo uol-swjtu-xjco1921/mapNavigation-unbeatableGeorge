@@ -230,8 +230,7 @@ int read_geoms(char* filename, AdjacencyMatrix* adj_matrix)
                 exit(ERROR_DATA_READ_FAILED);
             }
             // 将该geoms 添加到邻接表中
-            long long* nodes = NULL;
-            char tokens[50][20] = { 0 };
+            char tokens[50][20] = { {0} };
             char delim[] = " "; // 分割符号
             char* token = strtok(line, delim); // 获取分割后的第一个子串
             int len = 0; // 计数器

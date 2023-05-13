@@ -224,7 +224,7 @@ void add_geoms_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long geom_i
         long long node_id = 0;
         if (sscanf(tokens[i], "node=%lld", &node_id) != 1)
         {
-            fprintf(stderr, "Error: Failed to parse geom data in %d\n");
+            fprintf(stderr, "Error: Failed to parse geom data in %lld\n", node_id);
             free_adjacency_matrix(adj_matrix);
             exit(ERROR_DATA_READ_FAILED);
         }
