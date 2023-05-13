@@ -1,120 +1,144 @@
-/*THIS FILE JUST A DEMO PUBLISHED BY TEACHER WHICH WILL BE CHANGED LATER*/
-/*COMMIT FOR SAVE*/
-#include<stdio.h>
-#include<stdlib.h>
-#include<SDL.h>
-//å®šä¹‰ç»“ç‚¹ç»“æ„ä½“
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL.h>
+#include <math.h>
+
+#include "hashTable.h"
+#include "mapAdjMatrix.h"
+#include "mapReader.h"
+#include "mapEditor.h"
+#include "pathFinder.h"
+
+// ¶¨ÒåµØÇò°ë¾¶Îª³£Á¿£¬µ¥Î» km
+const double EARTH_RADIUS = 6371.0;
+//¶¨Òå½áµã½á¹¹Ìå
 SDL_Rect* graphicPoints;
-int** g;//é‚»æ¥çŸ©é˜µæ–¹å¼
-int* vis;
-int** path;
-int* dis;
-int n, m, s, t;//nä¸ªç»“ç‚¹ï¼Œmæ¡è¾¹,sä¸ºèµ·ç‚¹,tä¸ºç»ˆç‚¹
+int** g;//ÁÚ½Ó¾ØÕó·½Ê½
 SDL_Window* window;
 SDL_Renderer* renderer;
-void val_init() {
-	for (int i = 0; i < n; i++) {
-		dis[i] = 0x3f3f3f3f;
-		vis[i] = 0;
-		for (int j = 0; j < n; j++) {
-			g[i][j] = 0x3f3f3f3f;//ä»£è¡¨è·ç¦»ä¸ºæ— ç©·
-			path[i][j] = -1;//ä»£è¡¨æºç»“ç‚¹ä¸ºè‡ªå·±
-		}
-	}
+
+void Mercaor_x_y(double lon, double lat, double* x, double* y) {
+	// ¼ÆËãÄ«¿¨ÍĞÍ¶Ó°ÖĞµÄ X ºÍ Y ×ø±êÖµ
+	*x = EARTH_RADIUS * lon * M_PI / 180.0;
+	*y = EARTH_RADIUS * log(tan((M_PI / 4) + (lat * M_PI / 180) / 2));
 }
-void init() {
-	//åˆå§‹åŒ–ç›¸åº”windowã€rendererã€texture
+
+void init(AdjacencyMatrix* adj_matrix,int *w_window, int *h_window) 
+{
+	double lon_len = adj_matrix->bounding.maxLon - adj_matrix->bounding.minLon;
+	double lat_len = adj_matrix->bounding.maxLat - adj_matrix->bounding.minLat;
+	double factor_window = lat_len / lon_len;
+	*w_window = 1000;
+	*h_window = *w_window * factor_window*2;
+	//³õÊ¼»¯ÏàÓ¦window¡¢renderer¡¢texture
 	SDL_Init(SDL_INIT_VIDEO);
+	// ´´½¨Ò»¸öÃûÎª "Path Draw" µÄ´°¿Ú£¬¿íºÍ¸ß¾ùÎª 600 ÏñËØ£¬½«ÆäÏÔÊ¾ÔÚÆÁÄ»ÖĞĞÄ
 	window = SDL_CreateWindow("Path Draw", SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_SHOWN);
-	renderer = SDL_CreateRenderer(window, -1, 0);
-	freopen("graph.txt", "r", stdin);//æ›´æ¢æ ‡å‡†è¾“å…¥æµ
-	//åˆå§‹åŒ–å›¾
-	scanf("%d %d %d %d", &n, &m, &s, &t);
-	graphicPoints = (SDL_Rect*)malloc(sizeof(SDL_Rect) * n);//nä¸ªç»“ç‚¹
-	g = (int**)malloc(sizeof(int*) * n);//ç”Ÿæˆå¯¹åº”æ•°æ®
-	vis = (int*)malloc(sizeof(int) * n);
-	path = (int**)malloc(sizeof(int*) * n);
-	dis = (int*)malloc(sizeof(int) * n);
-	for (int i = 0; i < n; i++) {
-		//ç”ŸæˆäºŒç»´æ•°ç»„
-		g[i] = (int*)malloc(sizeof(int) * n);
-		path[i] = (int*)malloc(sizeof(int) * n);
-		//è¯»å…¥å¯¹åº”çš„ç»“ç‚¹åæ ‡
-		scanf("%d %d", &graphicPoints[i].x, &graphicPoints[i].y);
-		graphicPoints[i].x = graphicPoints[i].x - 5;
-		graphicPoints[i].y = graphicPoints[i].y - 5;
-		graphicPoints[i].w = 10;//è®¾ç½®çŸ©é˜µé•¿å®½
-		graphicPoints[i].h = 10;
-	}
-	//åˆå§‹åŒ–ç›¸å…³æ•°ç»„
-	val_init();
-	int node1, node2;
-	for (int i = 0; i < m; i++) {
-		scanf("%d %d", &node1, &node2);
-		//æ±‚ä¸¤ç‚¹ç›´æ¥çš„è·ç¦»ï¼Œç”±äºè¿™é‡Œç»˜åˆ¶ä¸¤ç‚¹ä¹‹é—´çš„çº¿æ®µä¸éœ€è¦æ ¹æ®è®¡ç®—å‡ºçš„è·ç¦»ï¼Œè¿™ä¸ªè·ç¦»åªæ˜¯ç”¨äº
-		æ¯”è¾ƒå¤§å°ï¼Œæ‰€ä»¥æ— éœ€å¼€æ ¹
-			int a = (graphicPoints[node1].x - graphicPoints[node2].x) *
-			(graphicPoints[node1].x - graphicPoints[node2].x);
-		int b = (graphicPoints[node1].y - graphicPoints[node2].y) *
-			(graphicPoints[node1].y - graphicPoints[node2].y);
-		g[node1][node2] = (a + b);
-		g[node2][node1] = (a + b);//æ— å‘å›¾
+		SDL_WINDOWPOS_CENTERED, *w_window+200, *h_window+200, SDL_WINDOW_SHOWN);
+	// ´´½¨Ò»¸öäÖÈ¾Æ÷ renderer£¬ÓÃÀ´äÖÈ¾Í¼ĞÎÄÚÈİ
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	// ÆôÓÃ¿¹¾â³İ
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
+	graphicPoints = (SDL_Rect*)malloc(sizeof(SDL_Rect) * adj_matrix->num_points);//n¸ö½áµã
+	double min_x, min_y, max_x, max_y, factor_x, factor_y;
+	Mercaor_x_y(adj_matrix->bounding.minLon, adj_matrix->bounding.minLat, &min_x, &min_y);
+	Mercaor_x_y(adj_matrix->bounding.maxLon, adj_matrix->bounding.maxLat, &max_x, &max_y);
+	factor_x = *w_window / (max_x - min_x);
+	factor_y = *h_window / (max_y - min_y);
+	for (int i = 0; i < adj_matrix->num_points; i++) {
+		double x, y;
+		Mercaor_x_y(adj_matrix->points[i].lon, adj_matrix->points[i].lat, &x, &y);
+		x = (x - min_x) * factor_x + 100;
+		y = *h_window - (y - min_y) * factor_y + 100;
+		graphicPoints[i].x = x - 1;
+		graphicPoints[i].y = y - 1;
+		graphicPoints[i].w = 2;//ÉèÖÃ¾ØÕó³¤¿í
+		graphicPoints[i].h = 2;
 	}
 }
-void quit() {//é”€æ¯æ‰€æœ‰å †ä¸­çš„æ•°æ®ï¼Œé¿å…å†…å­˜æº¢å‡º
+
+void quit() {//Ïú»ÙËùÓĞ¶ÑÖĞµÄÊı¾İ£¬±ÜÃâÄÚ´æÒç³ö
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	free(graphicPoints);
-	for (int i = 0; i < n; i++) {
-		free(g[i]);
-		free(path[i]);
-	}
-	free(g);
-	free(vis);
-	free(path);
-	free(dis);
 }
-void render() {
+
+void render(AdjacencyMatrix* adj_matrix, int* path)
+{
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);//red
 	SDL_RenderClear(renderer);
-	//ç»˜åˆ¶åŸºç¡€è·¯å¾„
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);//é»‘è‰²
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			if (g[i][j] != 0x3f3f3f3f) {//æœ‰è¿æ¥ï¼Œé‚£ä¹ˆåˆ™ç»˜åˆ¶
+	//»æÖÆ½¨ÖşÎï
+	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 100); //ÂÌÉ«
+	for (int i = 0; i < adj_matrix->num_geoms; i++) 
+	{
+		for (int j = 0; j < adj_matrix->geoms[i].len_nodes - 1; j++) 
+		{
+			int p1 = adj_matrix->geoms[i].nodes[j];
+			int p2 = adj_matrix->geoms[i].nodes[j + 1];
+			SDL_RenderDrawLine(renderer, graphicPoints[p1].x + 1, graphicPoints[p1].y +
+				1, graphicPoints[p2].x + 1, graphicPoints[p2].y + 1);
+		}
+		int last_point = adj_matrix->geoms[i].nodes[adj_matrix->geoms[i].len_nodes - 1];
+		int first_point = adj_matrix->geoms[i].nodes[0];
+		SDL_RenderDrawLine(renderer, graphicPoints[last_point].x + 1, graphicPoints[last_point].y +
+			1, graphicPoints[first_point].x + 1, graphicPoints[first_point].y + 1);
+	}
+	//»æÖÆ»ù´¡Â·¾¶
+	SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255); // »ÒÉ«
+    // SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);//ºÚÉ«
+	for (int i = 0; i < adj_matrix->num_points; i++) {
+		for (int j = 0; j < adj_matrix->num_points; j++) {
+			if (adj_matrix->adj[i][j] != INF && adj_matrix->adj[i][j] != 0) {//ÓĞÁ¬½Ó£¬ÄÇÃ´Ôò»æÖÆ
 				SDL_RenderDrawLine(renderer, graphicPoints[i].x +
-					5, graphicPoints[i].y + 5, graphicPoints[j].x + 5, graphicPoints[j].y + 5);//-5æ˜¯ä¸º
-				äº†ä¿è¯çº¿æ¡å±…ä¸­
+					1, graphicPoints[i].y + 1, graphicPoints[j].x + 1, graphicPoints[j].y + 1);//-1ÊÇÎªÁË±£Ö¤ÏßÌõ¾ÓÖĞ
 			}
 		}
 	}
-	SDL_SetRenderDrawColor(renderer, 0, 255, 200, 255);//
-	//ç»˜åˆ¶æœ€çŸ­è·¯å¾„å³såˆ°tçš„æœ€çŸ­è·¯å¾„
-	int pos = t;
-	while (path[s][pos] != -1) {
-		int p = path[s][pos];
-		SDL_RenderDrawLine(renderer, graphicPoints[p].x + 5, graphicPoints[p].y +
-			5, graphicPoints[pos].x + 5, graphicPoints[pos].y + 5);
-		pos = path[s][pos];
+	// SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); //ÂÌÉ«
+	// SDL_SetRenderDrawColor(renderer, 255, 165, 0, 255); // ³ÈÉ«
+	SDL_SetRenderDrawColor(renderer, 255, 50, 50, 255); //ºìÉ«
+	//»æÖÆ×î¶ÌÂ·¾¶¼´sµ½tµÄ×î¶ÌÂ·¾¶
+	for (int i = 0; i < adj_matrix->num_points; i++)
+	{
+		if (path[i + 1] < 0 || path[i + 1] > adj_matrix->num_points - 1)
+		{
+			break;
+		}
+		int p1 = path[i];
+		int p2 = path[i + 1];
+		SDL_RenderDrawLine(renderer, graphicPoints[p1].x + 1, graphicPoints[p1].y +
+			1, graphicPoints[p2].x + 1, graphicPoints[p2].y + 1);
 	}
-	//ç»˜åˆ¶åŸºç¡€é¡¶ç‚¹
-	for (int i = 0; i < n; i++) {
+	//»æÖÆ»ù´¡¶¥µã
+	for (int i = 0; i < adj_matrix->num_points; i++) {
 		SDL_RenderDrawRect(renderer, &graphicPoints[i]);
 	}
-	//ç»™é¡¶ç‚¹å¡«å……é¢œè‰²
-	for (int i = 0; i < n; i++) {
-		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+	//¸ø¶¥µãÌî³äÑÕÉ«
+	for (int i = 0; i < adj_matrix->num_points; i++) {
+		SDL_SetRenderDrawColor(renderer, 0, 255, 200, 255); // ÌìÀ¶É«
 		SDL_RenderFillRect(renderer, &graphicPoints[i]);
 	}
-	SDL_RenderPresent(renderer);//æ¸²æŸ“åˆ°å±å¹•
-	SDL_Delay(10000);
-}
-int main() {
-	init();
-	dijkstra();
-	render();
-	quit();
-	return 0;
+	SDL_RenderPresent(renderer);//äÖÈ¾µ½ÆÁÄ»
+	SDL_Delay(100000);
 }
 
+int main() {
+	AdjacencyMatrix adj_matrix; // Define an adjacency matrix variable
+
+	init_adjacency_matrix(&adj_matrix); // Initialize the adjacency matrix
+
+	int result = read_map(&adj_matrix);
+
+	int* path = NULL;
+	path = (int*)malloc(sizeof(int) * (adj_matrix.num_points)); // ·ÖÅäÄÚ´æ¿Õ¼ä
+	memset(path, -1, sizeof(int) * adj_matrix.num_points);
+	result = ask_find_path(&adj_matrix, path);
+	int w_window = 0.0;
+	int h_window = 0.0;
+	init(&adj_matrix, &w_window, &h_window);
+	render(&adj_matrix, path);
+	quit();
+	free(path); // ÊÍ·Å¶¯Ì¬·ÖÅäµÄÄÚ´æ¿Õ¼ä
+	return 0;
+}

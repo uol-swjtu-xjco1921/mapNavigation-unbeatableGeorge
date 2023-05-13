@@ -11,12 +11,6 @@
 #include "mapEditor.h"
 #include "mapError.h"
 
-#define EDIT_SUCCESSFULLY 0
-#define EXIST 20
-#define NOT_EXIST 21
-
-#define MAX_LONG_LONG 12
-#define MAX_DOUBLE 13
 // 判断是不是 double  是不是int  是否超过了max和min
 
 int ask_modify_map(AdjacencyMatrix* adj_matrix)
@@ -326,7 +320,7 @@ int edit_map(AdjacencyMatrix* adj_matrix)
 
 
         /* 开始添加边 */
-        add_edge_to_adjacency_matrix(adj_matrix, link_id, node_id_from, node_id_to, length);
+        //add_edge_to_adjacency_matrix(adj_matrix, link_id, node_id_from, node_id_to, length);
         printf("已成功添加新边 id = %lld, node_1 <=> node_2 = %lld <=> %lld, length = %lf\n", link_id, node_id_from, node_id_to, length);
 
         break;
@@ -615,6 +609,10 @@ int is_node_exist(AdjacencyMatrix* adj_matrix, long long node_id)
     return NOT_EXIST;
 }
 
+int is_POI_exist(AdjacencyMatrix* adj_matrix, int POI)
+{
+
+}
 
 // 检查一个数是不是long long
 int check_lld(char* s)
