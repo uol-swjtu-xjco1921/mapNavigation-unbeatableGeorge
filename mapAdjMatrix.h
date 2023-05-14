@@ -1,5 +1,13 @@
-/* Define data structures */
+/***********************************/
+/* A shared header file for adjacency */
+/* matrix implementation.             */
+/***********************************/
 
+/* include guard				   */
+#ifndef MAP_ADJMATRIX_H
+#define MAP_ADJMATRIX_H
+
+/* Macro const for infinity in the adjacency matrix. */
 #define INF 9999
 
 typedef struct bounding_t
@@ -44,9 +52,17 @@ typedef struct adjacency_matrix_t
     HashTable* point_hash;  // hash table -- mapping from point ID to index
 } AdjacencyMatrix;
 
+/* Function declarations for initializing adjacency matrix. */
 void init_adjacency_matrix(AdjacencyMatrix* adj_matrix);  // initialize the adjacency matrix
+
+/* Function declarations for initializing adjacency matrix. */
 void add_point_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, double lat, double lon); // add a point to the adjacency matrix
 void add_edge_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, long long from,
     long long to, double length, double veg, double arch, double land, double speedLimit, int POIs[], int len_pois); // add a edge to the adjacency matrix
 void add_geoms_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long geom_id, int len, char tokens[][20]);
+
+/* Function declarations for freeing the memory used by the adjacency matrix. */
 void free_adjacency_matrix(AdjacencyMatrix* adj_matrix); // free the memory used by the adjacency matrix
+
+/* End of include guard. */
+#endif /* MAP_ADJMATRIX_H */

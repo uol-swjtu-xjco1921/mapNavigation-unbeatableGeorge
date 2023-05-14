@@ -1,11 +1,13 @@
-#define _CRT_SECURE_NO_WARNINGS
+// This program includes header files for standard input/output streams, 
+// commonly used utility libraries, and custom implementation files.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "hashTable.h"
-#include "mapAdjMatrix.h"
-#include "mapError.h"
+#include "hashTable.h" // Header file for hash table implementation
+#include "mapAdjMatrix.h" // Header file for adjacency matrix graph representation
+#include "mapError.h" // Header file for error handling in map operations.
+
 
 /* Initialize adjacency and hash tables */
 void init_adjacency_matrix(AdjacencyMatrix* adj_matrix)
@@ -25,35 +27,52 @@ void init_adjacency_matrix(AdjacencyMatrix* adj_matrix)
     adj_matrix->edges = NULL;
     adj_matrix->adj = NULL;
     adj_matrix->geoms = NULL;
-    // init hash table
+    // give memory to  hash table
     adj_matrix->point_hash = (HashTable*)calloc(1, sizeof(HashTable));
     if (adj_matrix->point_hash == NULL)
         exit(ERROR_MALLOC_FAILED);
-    init_hashtable(adj_matrix->point_hash);   // Initialize the hash table
+    // Initialize the hash table
+    init_hashtable(adj_matrix->point_hash);
 }
 
 
 /* Free adjacency matrix memory   */
 void free_adjacency_matrix(AdjacencyMatrix* adj_matrix)
 {
+    // Free the memory allocated for the points
     if (adj_matrix->points != NULL)
         free(adj_matrix->points);
 
-    if (adj_matrix->adj != NULL) {
-        for (int i = 0; i < adj_matrix->num_points; i++) {
-            if (adj_matrix->adj[i] != NULL) {
+    // Free the memory allocated for the edges
+    if (adj_matrix->edges != NULL)
+        free(adj_matrix->edges);
+    
+    // Free the memory allocated for the geometries
+    if (adj_matrix->geoms != NULL)
+        free(adj_matrix->geoms);
+
+    // Free the memory allocated for the adjacency matrix
+    if (adj_matrix->adj != NULL) 
+    {
+        // Free the memory allocated for each row of the adjacency matrix
+        for (int i = 0; i < adj_matrix->num_points; i++) 
+        {
+            if (adj_matrix->adj[i] != NULL) 
+            {
                 free(adj_matrix->adj[i]);
             }
         }
+        // Free the memory allocated for the adjacency matrix itself
         free(adj_matrix->adj);
     }
 
+    // Free the memory allocated for the point hash table
     if (adj_matrix->point_hash != NULL)
         free_hashtable(adj_matrix->point_hash);
 }
 
 
-/* Add a point to the adjacency matrix    */
+/* Add a point to the adjacency matrix */
 void add_point_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, double lat, double lon)
 {
     // Look up in Hash table to prevent the same point id
@@ -72,12 +91,16 @@ void add_point_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, do
         exit(ERROR_HASH_ADD);
     }
 
+
     if (adj_matrix->num_points == 0)
-    { // If it's the first point, allocate memory dynamically
+    {
+        // If it's the first point, allocate memory dynamically
         adj_matrix->points = (Point*)malloc(sizeof(Point));
         adj_matrix->adj = (double**)malloc(sizeof(double*));
         adj_matrix->adj[0] = (double*)malloc(sizeof(double));
-        adj_matrix->adj[0][0] = 0;  // 初始化为 0
+        
+        // Set the distance on the diagonal to 0
+        adj_matrix->adj[0][0] = 0;
         if (adj_matrix->points == NULL || adj_matrix->adj == NULL)
         {
             printf("malloc failed in point add process!\n");
@@ -86,7 +109,8 @@ void add_point_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, do
         }
     }
     else
-    { // Otherwise, memory needs to be reallocated
+    {
+        // Otherwise, memory needs to be reallocated
         adj_matrix->points = (Point*)realloc(adj_matrix->points, (unsigned long long)(adj_matrix->num_points + 1) * sizeof(Point));
         adj_matrix->adj = (double**)realloc(adj_matrix->adj, (unsigned long long)(adj_matrix->num_points + 1) * sizeof(double*));
         if (adj_matrix->points == NULL || adj_matrix->adj == NULL)
@@ -139,7 +163,8 @@ void add_edge_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, lon
     }
 
     if (adj_matrix->num_edges == 0)
-    { // If it's the first edge, allocate dynamically
+    {
+        // If it's the first edge, allocate dynamically
         adj_matrix->edges = (Edge*)malloc(sizeof(Edge));
         if (adj_matrix->edges == NULL)
         {
@@ -149,7 +174,8 @@ void add_edge_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, lon
         }
     }
     else
-    { // Otherwise, memory needs to be reallocated
+    {
+        // Otherwise, memory needs to be reallocated
         adj_matrix->edges = (Edge*)realloc(adj_matrix->edges, (unsigned long long)(adj_matrix->num_edges + 1) * sizeof(Edge));
         if (adj_matrix->edges == NULL)
         {
@@ -158,10 +184,11 @@ void add_edge_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, lon
             exit(ERROR_MALLOC_FAILED);
         }
     }
+
     // init pois
     adj_matrix->edges[adj_matrix->num_edges].pois = NULL;
 
-    /* 存入边的信息到edges中 */
+    // Stores information about edges to edges 
     adj_matrix->edges[adj_matrix->num_edges].id = id;
     adj_matrix->edges[adj_matrix->num_edges].from = from;
     adj_matrix->edges[adj_matrix->num_edges].to = to;
@@ -172,7 +199,7 @@ void add_edge_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, lon
     adj_matrix->edges[adj_matrix->num_edges].speedLimit = speedLimit;
     adj_matrix->edges[adj_matrix->num_edges].num_pois = len_pois;
     
-    /* add POIs to edges */
+    // add POIs to edges
     if (len_pois != 0)
     {
         adj_matrix->edges[adj_matrix->num_edges].pois = (int*)malloc(sizeof(int) * len_pois);
@@ -184,7 +211,7 @@ void add_edge_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, lon
         printf("\n");
     }
 
-    /* Find information about the points from and to from the hash table    */
+    // Find information about the points from and to from the hash table
     int from_index = hashtable_lookup(adj_matrix->point_hash, from);
     int to_index = hashtable_lookup(adj_matrix->point_hash, to);
     adj_matrix->adj[from_index][to_index] = length;
@@ -193,10 +220,12 @@ void add_edge_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, lon
 }
 
 
+/* Add a geom to adjacency matrix */
 void add_geoms_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long geom_id, int len, char tokens[][20])
 {
     if (adj_matrix->num_geoms == 0)
-    { // If it's the first geom, allocate dynamically
+    {
+        // If it's the first geom, allocate dynamically
         adj_matrix->geoms = (Geom*)malloc(sizeof(Geom));
         if (adj_matrix->geoms == NULL)
         {
@@ -206,7 +235,8 @@ void add_geoms_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long geom_i
         }
     }
     else
-    { // Otherwise, memory needs to be reallocated
+    {
+        // Otherwise, memory needs to be reallocated
         adj_matrix->geoms = (Geom*)realloc(adj_matrix->geoms, (unsigned long long)(adj_matrix->num_geoms + 1) * sizeof(Geom));
         if (adj_matrix->geoms == NULL)
         {
@@ -215,9 +245,13 @@ void add_geoms_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long geom_i
             exit(ERROR_MALLOC_FAILED);
         }
     }
+
+    // Initialize the new geometry
     adj_matrix->geoms[adj_matrix->num_geoms].nodes = NULL;
     adj_matrix->geoms[adj_matrix->num_geoms].id = geom_id;
     adj_matrix->geoms[adj_matrix->num_geoms].len_nodes = len - 3;
+    
+    // Allocate memory for and add the nodes to the geometry
     adj_matrix->geoms[adj_matrix->num_geoms].nodes = (long long*)malloc(sizeof(long long) * (len-3));
     for (int i = 2; i < len - 1; i++)
     {
@@ -228,6 +262,8 @@ void add_geoms_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long geom_i
             free_adjacency_matrix(adj_matrix);
             exit(ERROR_DATA_READ_FAILED);
         }
+
+        // Look up the node in the Hash table
         int result = 0;
         result = hashtable_lookup(adj_matrix->point_hash, node_id);
         if (result == -1)
@@ -236,7 +272,11 @@ void add_geoms_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long geom_i
             free_adjacency_matrix(adj_matrix);
             exit(ERROR_FIND_PATH_FAILED);
         }
+
+        // Add the node to the geometry
         adj_matrix->geoms[adj_matrix->num_geoms].nodes[i - 2] = result;
     }
+
+    // Increment the number of geoms counter
     adj_matrix->num_geoms++;
 }

@@ -1,26 +1,28 @@
-#define _CRT_SECURE_NO_WARNINGS
+// This program includes header files for standard input/output streams, SDL graphics library,
+// commonly used utility libraries, and custom implementation files.
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL.h>
+#include <SDL.h> // Header file for SDL graphics library
 #include <math.h>
 
-#include "hashTable.h"
-#include "mapAdjMatrix.h"
-#include "mapError.h"
-#include "mapReader.h"
-#include "mapEditor.h"
-#include "pathFinder.h"
-#include "pathVisualizer.h"
+#include "hashTable.h" // Header file for hash table implementation
+#include "mapAdjMatrix.h" // Header file for adjacency matrix graph representation
+#include "mapError.h" // Header file for error handling in map operations
+#include "mapReader.h" // Header file for reading map data
+#include "mapEditor.h" // Header file for editing map data
+#include "pathFinder.h" // Header file for path finding algorithms
+#include "pathVisualizer.h" // Header file for visualizing paths on the map.
 
-// 定义地球半径为常量，单位 km
+// Define the constant of Earth radius in kilometers.
 const double EARTH_RADIUS = 6371.0;
-//定义结点结构体
+#define M_PI 3.1415926
+// Define the struct for nodes.
 SDL_Rect* graphicPoints;
 SDL_Window* window;
 SDL_Renderer* renderer;
 
 void Mercaor_x_y(double lon, double lat, double* x, double* y) {
-	// 计算墨卡托投影中的 X 和 Y 坐标值
+	// Calculate the X and Y coordinates in Mercator projection.
 	*x = EARTH_RADIUS * lon * M_PI / 180.0;
 	*y = EARTH_RADIUS * log(tan((M_PI / 4) + (lat * M_PI / 180) / 2));
 }
@@ -32,16 +34,17 @@ void init(AdjacencyMatrix* adj_matrix,int *w_window, int *h_window)
 	double factor_window = lat_len / lon_len;
 	*w_window = 1000;
 	*h_window = *w_window * factor_window*2;
-	//初始化相应window、renderer、texture
+	//Initialize the corresponding window, renderer, and texture.
 	SDL_Init(SDL_INIT_VIDEO);
-	// 创建一个名为 "Path Draw" 的窗口，宽和高均为 600 像素，将其显示在屏幕中心
+	// Create a window named "Path Draw", with width and height of 600 pixels, and show it in the center of the 
 	window = SDL_CreateWindow("Path Draw", SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED, *w_window+200, *h_window+200, SDL_WINDOW_SHOWN);
-	// 创建一个渲染器 renderer，用来渲染图形内容
+	// Create a renderer to render graphics content.
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	// 启用抗锯齿
+	// Enable anti-aliasing.
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
-	graphicPoints = (SDL_Rect*)malloc(sizeof(SDL_Rect) * adj_matrix->num_points);//n个结点
+	//n nodes
+	graphicPoints = (SDL_Rect*)malloc(sizeof(SDL_Rect) * adj_matrix->num_points);
 	double min_x, min_y, max_x, max_y, factor_x, factor_y;
 	Mercaor_x_y(adj_matrix->bounding.minLon, adj_matrix->bounding.minLat, &min_x, &min_y);
 	Mercaor_x_y(adj_matrix->bounding.maxLon, adj_matrix->bounding.maxLat, &max_x, &max_y);
@@ -54,26 +57,30 @@ void init(AdjacencyMatrix* adj_matrix,int *w_window, int *h_window)
 		y = *h_window - (y - min_y) * factor_y + 100;
 		graphicPoints[i].x = x - 1;
 		graphicPoints[i].y = y - 1;
-		graphicPoints[i].w = 2;//设置矩阵长宽
+		//Set the matrix length and width.
+		graphicPoints[i].w = 2;
 		graphicPoints[i].h = 2;
 	}
 }
 
 void quit() 
-{ //销毁所有堆中的数据，避免内存溢出
+{ // Destroy all data in heap to avoid memory overflow
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	free(graphicPoints);
 }
 
+// Render the adjacency matrix and shortest path between two points
 void render(AdjacencyMatrix* adj_matrix, int* path)
 {
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);//red
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // clear the renderer
 	SDL_RenderClear(renderer);
-	//绘制建筑物
-	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 100); //绿色
+	
+	// Draw buildings
+	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 100); // set building color to green
+	
 	for (int i = 0; i < adj_matrix->num_geoms; i++) 
-	{
+	{ // draw each building's outline
 		for (int j = 0; j < adj_matrix->geoms[i].len_nodes - 1; j++) 
 		{
 			int p1 = adj_matrix->geoms[i].nodes[j];
@@ -86,21 +93,27 @@ void render(AdjacencyMatrix* adj_matrix, int* path)
 		SDL_RenderDrawLine(renderer, graphicPoints[last_point].x + 1, graphicPoints[last_point].y +
 			1, graphicPoints[first_point].x + 1, graphicPoints[first_point].y + 1);
 	}
-	//绘制基础路径
-	SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255); // 灰色
-    // SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);//黑色
-	for (int i = 0; i < adj_matrix->num_points; i++) {
-		for (int j = 0; j < adj_matrix->num_points; j++) {
-			if (adj_matrix->adj[i][j] != INF && adj_matrix->adj[i][j] != 0) {//有连接，那么则绘制
+	
+	// Draw base path
+	SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255); // set base path color to gray
+    // SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150); // black
+	for (int i = 0; i < adj_matrix->num_points; i++) 
+	{
+		for (int j = 0; j < adj_matrix->num_points; j++) 
+		{
+			if (adj_matrix->adj[i][j] != INF && adj_matrix->adj[i][j] != 0) 
+			{
+				// if two points are connected, draw the line
 				SDL_RenderDrawLine(renderer, graphicPoints[i].x +
-					1, graphicPoints[i].y + 1, graphicPoints[j].x + 1, graphicPoints[j].y + 1);//-1是为了保证线条居中
+					1, graphicPoints[i].y + 1, graphicPoints[j].x + 1, graphicPoints[j].y + 1);
 			}
 		}
 	}
-	// SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); //绿色
-	// SDL_SetRenderDrawColor(renderer, 255, 165, 0, 255); // 橙色
-	SDL_SetRenderDrawColor(renderer, 255, 50, 50, 255); //红色
-	//绘制最短路径即s到t的最短路径
+	
+	// SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // green
+	// SDL_SetRenderDrawColor(renderer, 255, 165, 0, 255); // orange
+	SDL_SetRenderDrawColor(renderer, 255, 50, 50, 255); // set shortest path color to red
+	// Draw shortest path in red from s to t
 	for (int i = 0; i < adj_matrix->num_points; i++)
 	{
 		if (path[i + 1] < 0 || path[i + 1] > adj_matrix->num_points - 1)
@@ -112,25 +125,38 @@ void render(AdjacencyMatrix* adj_matrix, int* path)
 		SDL_RenderDrawLine(renderer, graphicPoints[p1].x + 1, graphicPoints[p1].y +
 			1, graphicPoints[p2].x + 1, graphicPoints[p2].y + 1);
 	}
-	//绘制基础顶点
+
+	// Draw base vertices
 	for (int i = 0; i < adj_matrix->num_points; i++) {
 		SDL_RenderDrawRect(renderer, &graphicPoints[i]);
 	}
-	//给顶点填充颜色
+
+	// Fill vertices with light blue color
 	for (int i = 0; i < adj_matrix->num_points; i++) {
-		SDL_SetRenderDrawColor(renderer, 0, 255, 200, 255); // 天蓝色
+		SDL_SetRenderDrawColor(renderer, 0, 255, 200, 255); // blue sky
 		SDL_RenderFillRect(renderer, &graphicPoints[i]);
 	}
-	SDL_RenderPresent(renderer);//渲染到屏幕
+
+	// render to the screen
+	// delay for 100000 milliseconds
+	SDL_RenderPresent(renderer);
 	SDL_Delay(100000);
 }
 
+
+// Visualize the adjacency matrix and shortest path using SDL2
 int visualize(AdjacencyMatrix* adj_matrix, int* path)
 {
 	int w_window = 0.0;
 	int h_window = 0.0;
+	
+	// initialize the SDL2 window and renderer with adjacency matrix dimensions
 	init(adj_matrix, &w_window, &h_window);
+	
+	// render the adjacency matrix and shortest path using SDL2
 	render(adj_matrix, path);
+	
+	// destroy all data in heap and free memory to avoid memory leaks
 	quit();
 	return FUNCTION_SUCCESS;
 }

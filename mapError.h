@@ -4,8 +4,8 @@
 /***********************************/
 
 /* include guard				   */
-#ifndef PGM_ERROR_H
-#define PGM_ERROR_H
+#ifndef MAP_ERROR_H
+#define MAP_ERROR_H
 
 /* macro constant for success	   */
 #define PROGRAMME_SUCCESS 0
@@ -24,4 +24,4 @@
 #define NULL_POINTER 10
 
 /* end of include guard			   */
-#endif /*PGM_ERROR_H*/
+#endif /* MAP_ERROR_H */

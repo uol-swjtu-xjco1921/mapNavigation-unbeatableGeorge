@@ -1,14 +1,15 @@
-#define _CRT_SECURE_NO_WARNINGS
+// This program includes header files for standard input/output streams,
+// commonly used utility libraries, and custom implementation files.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "hashTable.h"
-#include "mapAdjMatrix.h"
-#include "mapReader.h"
-#include "mapError.h"
+#include "hashTable.h" // Header file for hash table implementation
+#include "mapAdjMatrix.h" // Header file for adjacency matrix graph representation
+#include "mapReader.h" // Header file for reading map data
+#include "mapError.h" // Header file for error handling in map operations.
 
-/*  the main function in read map module */
+// the main function in read map module
 int read_map(AdjacencyMatrix* adj_matrix)
 {
     printf("\nWelcome to the Map Navigator! Here is an overview of the entire process:\n");
@@ -30,6 +31,7 @@ int read_map(AdjacencyMatrix* adj_matrix)
             continue;
         }
 
+        // Check if the filename length exceeds the maximum allowed length
         int len = strlen(filename);
         if (len == 100)
         {
@@ -37,13 +39,14 @@ int read_map(AdjacencyMatrix* adj_matrix)
             free(filename);
             continue;
         }
-        // 去掉末尾的回车符
+
+        // Remove the trailing newline character
         if (filename[len - 1] == '\n')
         {
             filename[len - 1] = '\0';
         }
 
-        /* Read the data file and transform it into an adjacency matrix */
+        // Read the data file and transform it into an adjacency matrix
         int result = read_points(filename, adj_matrix);
         if (result == ERROR_BAD_FILE)
         {
@@ -52,6 +55,8 @@ int read_map(AdjacencyMatrix* adj_matrix)
             free(filename);
             continue;
         }
+
+        // Free the memory allocated for the filename string and print success message
         result = read_edges(filename, adj_matrix);
         result = read_geoms(filename, adj_matrix);
         free(filename);
@@ -63,23 +68,23 @@ int read_map(AdjacencyMatrix* adj_matrix)
 
 int read_points(char* filename, AdjacencyMatrix* adj_matrix)
 {
-    /* Define variables for parsing the data file*/
+    // Define variables for parsing the data file
     char line[512];
     int count = 0;
 
-    /* Open the data file */
+    // Open the data file
     FILE* fp = fopen(filename, "r");
     if (fp == NULL)
     {
         return ERROR_BAD_FILE;
     }
-    /* read points bonding  */
+    // read points bonding
     if (fgets(line, sizeof(line), fp) != NULL)
     {
-        //<bounding minLat=53.801600 minLon=-1.564000 maxLat=53.811000 maxLon=-1.543100 /bounding>
+        // valid bounding: <bounding minLat=53.801600 minLon=-1.564000 maxLat=53.811000 maxLon=-1.543100 /bounding>
         if (line[0] == '<' && line[1] == 'b' && line[2] == 'o' && line[3] == 'u' && line[4] == 'n')
         {
-            /// Use sscanf() to parse the line string
+            // Use sscanf() to parse the line string
             if (sscanf(line, "<bounding minLat=%lf minLon=%lf maxLat=%lf maxLon=%lf /bounding>",
                 &adj_matrix->bounding.minLat, &adj_matrix->bounding.minLon, &adj_matrix->bounding.maxLat, &adj_matrix->bounding.maxLon) != 4)
             {
@@ -92,17 +97,17 @@ int read_points(char* filename, AdjacencyMatrix* adj_matrix)
         memset(line, 0, sizeof(line));
     }
 
-    /* Read each line from the data file */
+    // Read each line from the data file
     while (fgets(line, sizeof(line), fp) != NULL)
     { // Read the contents of the data file line by line
         if (line[0] == '<' && line[1] == 'n' && line[2] == 'o' && line[3] == 'd' && line[4] == 'e')
         {
-            /* If the line contains information about a point */
+            // If the line contains information about a point
             long long id = -1;
             double lat = -1;
             double lon = -1;
 
-            /// Use sscanf() to parse the line string
+            // Use sscanf() to parse the line string
             if (sscanf(line, "<node id=%lld lat=%lf lon=%lf /node>", &id, &lat, &lon) != 3)
             {
                 free_adjacency_matrix(adj_matrix);
@@ -117,18 +122,19 @@ int read_points(char* filename, AdjacencyMatrix* adj_matrix)
         count++;
         memset(line, 0, sizeof(line));
     }
-    fclose(fp); // Close the data file
+    // Close the data file
+    fclose(fp);
     return FUNCTION_SUCCESS;
 }
 
 
 int read_edges(char* filename, AdjacencyMatrix* adj_matrix)
 {
-    /* Define variables for parsing the data file */
+    // Define variables for parsing the data file
     char line[512];
     int count = 0;
 
-    /* Open the data file */
+    // Open the data file
     FILE* fp = fopen(filename, "r");
     if (fp == NULL)
     {
@@ -136,10 +142,10 @@ int read_edges(char* filename, AdjacencyMatrix* adj_matrix)
     }
 
     while (fgets(line, sizeof(line), fp))
-    { // Read the contents of the data file line by line
+    {   // Read the contents of the data file line by line
         if (line[0] == '<' && line[1] == 'l' && line[2] == 'i' && line[3] == 'n' && line[4] == 'k')
         {
-            /* If the line contains information about an edge */
+            // If the line contains information about an edge
             long long link_id = -1;
             long long node_id_from = -1;
             long long node_id_to = -1;
@@ -161,22 +167,24 @@ int read_edges(char* filename, AdjacencyMatrix* adj_matrix)
                     exit(ERROR_DATA_READ_FAILED);
                 }
             }
-            // locate "POI="
-            char poi_str[50]; // 用于存储 POI 字符串
+
+            // locate the string "POI="
+            char poi_str[50]; // Used to store POI string
             int POIs[20] = { -1 };
             int len_poi = 0;
-            // 定位到第一个 POI 属性，并读取其字符串
+            
+            // Locate the first POI attribute and read its string
             char* poi_ptr = strstr(line, "POI=");
             if (poi_ptr != NULL) 
             {
-                // 找到了一个 POI 属性，解析其字符串
+                // Found a POI attribute, parse its string
                 if (sscanf(poi_ptr, "POI=%[^;];", poi_str) == 1) 
                 {
-                    // 成功解析 POI 字符串中的号码列表，使用逗号分隔
+                    // Successfully parsed the number list in the POI string, separated by commas
                     char* token = strtok(poi_str, ",");
                     while (token != NULL) 
                     {
-                        // 解析每个 POI 号码，并进行后续处理
+                        // Parse each POI number and process it
                         int poi;
                         if (strlen(token) > 0 && sscanf(token, "%d", &poi) == 1)
                         {
@@ -189,7 +197,7 @@ int read_edges(char* filename, AdjacencyMatrix* adj_matrix)
             }
             else 
             {
-                // 没有找到 POI 属性，需要处理异常情况
+                // POI attribute not found, need to handle exceptional cases
                 free_adjacency_matrix(adj_matrix);
                 fclose(fp);
                 fprintf(stderr, "Warning: POI attribute not found in `%s`.\n", line);
@@ -198,18 +206,20 @@ int read_edges(char* filename, AdjacencyMatrix* adj_matrix)
         }
         count++;
     }
-    fclose(fp); // Close the data file
+
+    // Close the data file
+    fclose(fp);
     return FUNCTION_SUCCESS;
 }
 
 
 int read_geoms(char* filename, AdjacencyMatrix* adj_matrix)
 {
-    /* Define variables for parsing the data file */
+    // Define variables for parsing the data file
     char line[512];
     int count = 0;
 
-    /* Open the data file */
+    // Open the data file
     FILE* fp = fopen(filename, "r");
     if (fp == NULL)
     {
@@ -217,10 +227,10 @@ int read_geoms(char* filename, AdjacencyMatrix* adj_matrix)
     }
 
     while (fgets(line, sizeof(line), fp))
-    { // Read the contents of the data file line by line
+    {   // Read the contents of the data file line by line
         if (line[0] == '<' && line[1] == 'g' && line[2] == 'e' && line[3] == 'o' && line[4] == 'm')
         {
-            /* If the line contains information about an edge */
+            // If the line contains information about an edge
             long long geom_id = -1;
             if (sscanf(line, "<geom id=%lld", &geom_id) != 1)
             {
@@ -229,16 +239,20 @@ int read_geoms(char* filename, AdjacencyMatrix* adj_matrix)
                 fprintf(stderr, "Error: Failed to parse geom data in %d\n", count);
                 exit(ERROR_DATA_READ_FAILED);
             }
-            // 将该geoms 添加到邻接表中
+
+            // Add this geoms to the adjacency matrix
             char tokens[50][20] = { {0} };
-            char delim[] = " "; // 分割符号
-            char* token = strtok(line, delim); // 获取分割后的第一个子串
-            int len = 0; // 计数器
+            char delim[] = " "; // Separator
+            char* token = strtok(line, delim); // Get the first substring after splitting
+            int len = 0; // Counter
             while (token != NULL) {
-                // 将子串拷贝到 tokens 数组
+                // Copy the substring to the tokens array
                 strncpy(tokens[len], token, sizeof(tokens[len]));
-                tokens[len][strlen(tokens[len])] = '\0'; // 在字符串末尾添加结束符
-                // 获取下一个子串
+
+                // Add an end character at the end of the string
+                tokens[len][strlen(tokens[len])] = '\0';
+
+                // Get the next substring
                 token = strtok(NULL, delim);
                 ++len;
             }
@@ -246,6 +260,8 @@ int read_geoms(char* filename, AdjacencyMatrix* adj_matrix)
         }
         count++;
     }
-    fclose(fp); // Close the data file
+
+    // Close the data file
+    fclose(fp);
     return FUNCTION_SUCCESS;
 }
