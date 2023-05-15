@@ -24,9 +24,10 @@ To ensure the correctness of our program, I have created a test file named "test
 
 You can execute the test file by running the following command in the terminal:
 
-    ./test.sh
+    make
+    bash test.sh
 
-Note: In order to avoid visual modules affecting the test speed change the code in pathVisualizer.c
+Note: In order to avoid visualization affecting the test speed, you have to change the code in pathVisualizer.c
 
     // delay for 1 millisecond to run test.sh
     SDL_RenderPresent(renderer);
