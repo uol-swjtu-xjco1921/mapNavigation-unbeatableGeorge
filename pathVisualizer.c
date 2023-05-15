@@ -32,7 +32,7 @@ void init(AdjacencyMatrix* adj_matrix,int *w_window, int *h_window)
 	double lon_len = adj_matrix->bounding.maxLon - adj_matrix->bounding.minLon;
 	double lat_len = adj_matrix->bounding.maxLat - adj_matrix->bounding.minLat;
 	double factor_window = lat_len / lon_len;
-	*w_window = 1000;
+	*w_window = 1200;
 	*h_window = *w_window * factor_window*2;
 	//Initialize the corresponding window, renderer, and texture.
 	SDL_Init(SDL_INIT_VIDEO);
@@ -104,8 +104,18 @@ void render(AdjacencyMatrix* adj_matrix, int* path)
 			if (adj_matrix->adj[i][j] != INF && adj_matrix->adj[i][j] != 0) 
 			{
 				// if two points are connected, draw the line
-				SDL_RenderDrawLine(renderer, graphicPoints[i].x +
-					1, graphicPoints[i].y + 1, graphicPoints[j].x + 1, graphicPoints[j].y + 1);
+				double link_cos = 0;
+				double link_sin = 1;
+				if ((graphicPoints[j].x - graphicPoints[i].x) != 0)
+				{
+					double slope = (graphicPoints[j].y - graphicPoints[i].y) / (graphicPoints[j].x - graphicPoints[i].x);
+					link_cos = 1 / sqrt(1 + slope * slope);
+					link_sin = slope / sqrt(1 + slope * slope);
+				}
+				SDL_RenderDrawLine(renderer, graphicPoints[i].x +1 + link_sin, graphicPoints[i].y + 1 + link_cos,
+					graphicPoints[j].x + 1 + link_sin, graphicPoints[j].y + 1 + link_cos);
+				SDL_RenderDrawLine(renderer, graphicPoints[i].x + 1 - link_sin, graphicPoints[i].y + 1 - link_cos,
+					graphicPoints[j].x + 1 - link_sin, graphicPoints[j].y + 1 - link_cos);
 			}
 		}
 	}
@@ -122,6 +132,18 @@ void render(AdjacencyMatrix* adj_matrix, int* path)
 		}
 		int p1 = path[i];
 		int p2 = path[i + 1];
+		double link_cos = 0;
+		double link_sin = 1;
+		if ((graphicPoints[p1].x - graphicPoints[p2].x) != 0)
+		{
+			double slope = (graphicPoints[p1].y - graphicPoints[p2].y) / (graphicPoints[p1].x - graphicPoints[p2].x);
+			link_cos = 1 / sqrt(1 + slope * slope);
+			link_sin = slope / sqrt(1 + slope * slope);
+		}
+		SDL_RenderDrawLine(renderer, graphicPoints[p1].x + 1 + link_sin, graphicPoints[p1].y + 1 + link_cos,
+			graphicPoints[p2].x + 1 + link_sin, graphicPoints[p2].y + 1 + link_cos);
+		SDL_RenderDrawLine(renderer, graphicPoints[p1].x + 1 - link_sin, graphicPoints[p1].y + 1 - link_cos,
+			graphicPoints[p2].x + 1 - link_sin, graphicPoints[p2].y + 1 - link_cos);
 		SDL_RenderDrawLine(renderer, graphicPoints[p1].x + 1, graphicPoints[p1].y +
 			1, graphicPoints[p2].x + 1, graphicPoints[p2].y + 1);
 	}
@@ -138,9 +160,9 @@ void render(AdjacencyMatrix* adj_matrix, int* path)
 	}
 
 	// render to the screen
-	// delay for 100000 milliseconds
+	// delay for 1 millisecond to run test.sh
 	SDL_RenderPresent(renderer);
-	SDL_Delay(100000);
+	SDL_Delay(20000);
 }
 
 

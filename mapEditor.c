@@ -1,4 +1,4 @@
-#// This program includes header files for standard input/output streams, 
+// This program includes header files for standard input/output streams, 
 // commonly used utility libraries, and custom implementation files.
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,7 +69,7 @@ int ask_modify_map(AdjacencyMatrix* adj_matrix)
         while (1)
         {
             // Prompt user for filename
-            printf("Please enter the map filename: ");
+            printf("Please enter the map filename(be written): ");
             char* filename = (char*)malloc(100 * sizeof(char));
             if (fgets(filename, 100, stdin) == NULL)
             {
@@ -169,7 +169,7 @@ int edit_map(AdjacencyMatrix* adj_matrix)
     switch (operate_type)
     {
     case 1:
-        printf("\n请依次输入点的id latitude longitude: \n");
+        printf("\nPlease enter id latitude longitude: \n");
 
         // output id latitude longitude and judge if they are correct
         long long point_id = get_input_ll("Input the node id: ");
@@ -185,6 +185,16 @@ int edit_map(AdjacencyMatrix* adj_matrix)
             return ERROR_EDIT_FAILED;
         }
 
+        // bounding
+        if (lat > adj_matrix->bounding.maxLat ||
+            lat < adj_matrix->bounding.minLat ||
+            lon > adj_matrix->bounding.maxLon ||
+            lon < adj_matrix->bounding.minLon)
+        {
+            printf("Editing failure: point out of bounding.(Valid: lat(%lf-%lf) lon(%lf-%lf))",
+                adj_matrix->bounding.minLat, adj_matrix->bounding.maxLat, adj_matrix->bounding.minLon, adj_matrix->bounding.maxLon);
+            return ERROR_EDIT_FAILED;
+        }
         // add the point to the adjacency matrix and check if it was added successfully
         add_point_to_adjacency_matrix(adj_matrix, point_id, lat, lon);
         printf("New point added successfully, id = %lld, latitude = %lf, longitude = %lf\n\n", point_id, lat, lon);
@@ -196,12 +206,6 @@ int edit_map(AdjacencyMatrix* adj_matrix)
         long long link_id = get_input_ll("Input the link ID you want to add: ");
         long long node_id_from = get_input_ll("Input the First Node of the edge: ");
         long long node_id_to = get_input_ll("Input the Second Node of the edge: ");
-        double length = get_input_double("Input the Length of the edge: ");
-        double veg = get_input_double("Input the Greening Degree of the edge(if confused type 0.0 is OK): ");
-        double arch = get_input_double("Input the Architectural Information of the edge(if confused type 0.0 is OK): ");
-        double land = get_input_double("Input the land Utilization of the edge(if confused type 0.0 is OK): ");
-        double speedLimit = get_input_double("Input the Speed Limit of the edge: ");
-        
         // determine whether the points are legal
         if (is_node_exist(adj_matrix, node_id_from) == NOT_EXIST)
         {   // determine if the point exists
@@ -222,6 +226,12 @@ int edit_map(AdjacencyMatrix* adj_matrix)
             printf("\nEditing failure: You are entering the self-loop edge!\n");
             return ERROR_EDIT_FAILED;
         }
+
+        double length = get_input_double("Input the Length of the edge: ");
+        double veg = get_input_double("Input the Greening Degree of the edge(if confused type 0.0 is OK): ");
+        double arch = get_input_double("Input the Architectural Information of the edge(if confused type 0.0 is OK): ");
+        double land = get_input_double("Input the land Utilization of the edge(if confused type 0.0 is OK): ");
+        double speedLimit = get_input_double("Input the Speed Limit of the edge: ");
 
         if (length <= 0 || veg < 0 || arch < 0 || land < 0 || speedLimit <= 0)
         {   // invalid input

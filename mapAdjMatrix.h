@@ -64,5 +64,10 @@ void add_geoms_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long geom_i
 /* Function declarations for freeing the memory used by the adjacency matrix. */
 void free_adjacency_matrix(AdjacencyMatrix* adj_matrix); // free the memory used by the adjacency matrix
 
+/* read and build matrix when reading*/
+void build_matrix(AdjacencyMatrix* adj_matrix);
+void add_point(AdjacencyMatrix* adj_matrix, long long id, double lat, double lon);
+
+
 /* End of include guard. */
 #endif /* MAP_ADJMATRIX_H */

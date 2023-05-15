@@ -1,0 +1,28 @@
+
+Welcome to the Map Navigator! Here is an overview of the entire process:
+1. Choose your map
+2. Modify map properties (this modification will be added to the map file)
+3. Enter location information
+This will allow you to see a visualization of the map that meets your requirements!
+
+Please enter the map filename: 
+Map read successfully!
+
+Current map has 3941 points and 2344 edges, and has been edited 0 times.
+
+Do you want to modify the map properties?
+1. Yes
+2. No
+Enter your choice(1 or 2): 
+Please enter the ID of the starting point: Please enter the ID of the ending point: 
+Do you need to pass through a specific node or POI(point of interest) on the map?
+1. No need
+2. Need to pass through a node on the map
+3. Need to pass through a point of interest on the map
+Please enter your selection: 
+Please enter the node ID you want to pass through: 
+Enter node ID: The node ID 2 does not exist! Please try again!
+
+Please enter the node ID you want to pass through: 
+Enter node ID: The shortest distance from node 249612090 to node 1659456324 via node 1967770418 is 1399.159721.
+The path is: 249612090->1659456312->1659456329->21545941->21545940->31004288->1160269594->1601125136->1601125109->21545939->1601125172->288958054->54070620->21545938->288958059->52905141->1668868122->21545937->54070579->354734667->354734674->54060543->1377220131->354734672->21069417->288958073->54060565->1668111642->288958080->21069416->354734677->-2478->274069728->1644773888->1967770415->1967770416->1967770418->1967770416->1967770415->1644773888->274069728->-2478->354734677->21069416->288958080->1668111642->54060565->288958073->21069417->354734672->1377220131->54060543->354734676->21069418->-2053181545->354734670->21069419->21069420->31004287->1377189453->21069421->247956997->21069422->247293248->21069423->288953461->244449810->247957367->21069424->249661995->21069425->664212051->1659456320->1659456374->1659456407->664212050->21545949->1377189445->250221635->250221634->1659456358->1659456370->1659456361->1659456260->1659456355->1659456324

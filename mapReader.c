@@ -117,11 +117,12 @@ int read_points(char* filename, AdjacencyMatrix* adj_matrix)
             }
 
             // Add the point to the adjacency matrix
-            add_point_to_adjacency_matrix(adj_matrix, id, lat, lon);
+            add_point(adj_matrix, id, lat, lon);
         }
         count++;
         memset(line, 0, sizeof(line));
     }
+    build_matrix(adj_matrix);
     // Close the data file
     fclose(fp);
     return FUNCTION_SUCCESS;

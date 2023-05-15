@@ -72,6 +72,84 @@ void free_adjacency_matrix(AdjacencyMatrix* adj_matrix)
 }
 
 
+/* add point when read map */
+void add_point(AdjacencyMatrix* adj_matrix, long long id, double lat, double lon)
+{
+    // Look up in Hash table to prevent the same point id
+    if (hashtable_lookup(adj_matrix->point_hash, id) != -1)
+    {
+        printf("Duplicated point ID %lld!\n", id);
+        free_adjacency_matrix(adj_matrix);
+        exit(ERROR_HASH_LOOK_UP);
+    }
+
+    // Add point in Hash table
+    if (hashtable_add(adj_matrix->point_hash, id, adj_matrix->num_points) == ERROR_HASH_ADD)
+    {
+        printf("Too much points! hash add failed!\n");
+        free_adjacency_matrix(adj_matrix);
+        exit(ERROR_HASH_ADD);
+    }
+
+    if (adj_matrix->num_points == 0)
+    {
+        // If it's the first point, allocate memory dynamically
+        adj_matrix->points = (Point*)malloc(sizeof(Point));
+
+        if (adj_matrix->points == NULL)
+        {
+            printf("malloc failed in point add process!\n");
+            free_adjacency_matrix(adj_matrix);
+            exit(ERROR_MALLOC_FAILED);
+        }
+    }
+    else
+    {
+        // Otherwise, memory needs to be reallocated
+        adj_matrix->points = (Point*)realloc(adj_matrix->points, (unsigned long long)(adj_matrix->num_points + 1) * sizeof(Point));        
+        
+        if (adj_matrix->points == NULL)
+        {
+            printf("malloc failed in point add process!\n");
+            free_adjacency_matrix(adj_matrix);
+            exit(ERROR_MALLOC_FAILED);
+        }
+    }
+
+    adj_matrix->points[adj_matrix->num_points].id = id;
+    adj_matrix->points[adj_matrix->num_points].lat = lat;
+    adj_matrix->points[adj_matrix->num_points].lon = lon;
+    adj_matrix->num_points++;
+}
+
+
+/* build matrix after read map */
+void build_matrix(AdjacencyMatrix* adj_matrix)
+{
+    adj_matrix->adj = (double**)malloc(sizeof(double*) * adj_matrix->num_points);
+    if (adj_matrix->adj == NULL)
+    {
+        printf("malloc failed in building matrix");
+        free_adjacency_matrix(adj_matrix);
+        exit(ERROR_MALLOC_FAILED);
+    }
+    for (int i = 0; i < adj_matrix->num_points; i++)
+    {
+        adj_matrix->adj[i] = (double*)malloc(sizeof(double) * adj_matrix->num_points);
+        if (adj_matrix->adj[i] == NULL)
+        {
+            printf("malloc failed in building matrix");
+            free_adjacency_matrix(adj_matrix);
+            exit(ERROR_MALLOC_FAILED);
+        }
+        for (int j = 0; j < adj_matrix->num_points; j++)
+        {
+            adj_matrix->adj[i][j] = INF;
+        }
+    }
+}
+
+
 /* Add a point to the adjacency matrix */
 void add_point_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, double lat, double lon)
 {
@@ -203,12 +281,16 @@ void add_edge_to_adjacency_matrix(AdjacencyMatrix* adj_matrix, long long id, lon
     if (len_pois != 0)
     {
         adj_matrix->edges[adj_matrix->num_edges].pois = (int*)malloc(sizeof(int) * len_pois);
+        if (adj_matrix->edges[adj_matrix->num_edges].pois == NULL)
+        {
+            printf("malloc failed");
+            free_adjacency_matrix(adj_matrix);
+            exit(ERROR_MALLOC_FAILED);
+        }
         for (int i = 0; i < len_pois; i++)
         {
             adj_matrix->edges[adj_matrix->num_edges].pois[i] = POIs[i];
-            printf("%d ", adj_matrix->edges[adj_matrix->num_edges].pois[i]);
         }
-        printf("\n");
     }
 
     // Find information about the points from and to from the hash table

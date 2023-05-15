@@ -142,12 +142,13 @@ int ask_find_path(AdjacencyMatrix* adj_matrix, int* path)
                     {
                         break;
                     }
+                    // print the point id
                     if (i == 0)
-                        printf("%d", path[i]);
+                        printf("%lld", adj_matrix->points[path[i]].id);
                     else
-                        printf("->%d", path[i]);
+                        printf("->%lld", adj_matrix->points[path[i]].id);
                 }
-                printf("\n Total length: %lf", len_path);
+                printf("\n Total length: %lf\n", len_path);
                 break;
             }
             else if (strcmp(line, "2") == 0)
@@ -175,12 +176,13 @@ int ask_find_path(AdjacencyMatrix* adj_matrix, int* path)
                     {
                         break;
                     }
+                    // print the point id
                     if (i == 0)
-                        printf("%d", path[i]);
+                        printf("%lld", adj_matrix->points[path[i]].id);
                     else
-                        printf("->%d", path[i]);
+                        printf("->%lld", adj_matrix->points[path[i]].id);
                 }
-                printf("\n Total time: %lf", len_time);
+                printf("\n Total time: %lf\n", len_time);
                 break;
             }
             else
@@ -315,12 +317,13 @@ int ask_find_path(AdjacencyMatrix* adj_matrix, int* path)
             {
                 break;
             }
+            // print points id
             if (i == 0)
-                printf("%d", path[i]);
+                printf("%lld", adj_matrix->points[path[i]].id);
             else
-                printf("->%d", path[i]);
+                printf("->%lld", adj_matrix->points[path[i]].id);
         }
-        printf("\n Total length: %lf", length_of_path);
+        printf("Total length: %lf\n", length_of_path);
     }
     return FUNCTION_SUCCESS;
 }
@@ -344,7 +347,7 @@ int ask_location_POI(AdjacencyMatrix* adj_matrix, long long* location, int* POI)
         // Read user input
         if (fgets(line, sizeof(line), stdin) == NULL)
         {
-            printf("读取失败,重新输入：\n");
+            printf("Reading failed, please try again:\n");
             continue;
         }
         // Remove newline character from user input
@@ -523,7 +526,7 @@ double dijkstra(AdjacencyMatrix* adj_matrix, int start, int end, int* path)
 
     if (dist[end] == INF)
     {
-        printf("There is no available path from node %d to node %d.\n", start, end);
+        printf("There is no available path from node %lld to node %lld.\n", adj_matrix->points[start].id, adj_matrix->points[end].id);
         free(dist);
         free(st);
         free(pre);
@@ -531,7 +534,6 @@ double dijkstra(AdjacencyMatrix* adj_matrix, int start, int end, int* path)
     }
     else
     {
-        //printf("The shortest distance from node %d to node %d is %lf.\n", start, end, dist[end]);
         // If a path exists, construct the path array by tracing back from the ending node to the starting node.
         int len = 0;
         int temp = end;
@@ -626,7 +628,7 @@ void dijkstra_via(AdjacencyMatrix* adj_matrix, int start, int end, int via, int*
     // If there is no available path from start to via, return NO_PATH
     if (dist_start[via] == INF) 
     {
-        printf("There is no available path from node %d to node %d via node %d.\n", start, end, via);
+        printf("There is no available path from node %lld to node %lld via node %lld.\n", adj_matrix->points[start].id, adj_matrix->points[end].id, adj_matrix->points[via].id);
         free(dist_start);
         free(dist_tmp);
         free(st);
@@ -667,7 +669,7 @@ void dijkstra_via(AdjacencyMatrix* adj_matrix, int start, int end, int via, int*
 
     // If there is no available path from via to end, return NO_PATH
     if (dist_tmp[end] == INF) {
-        printf("There is no available path from node %d to node %d via node %d.\n", start, end, via);
+        printf("There is no available path from node %lld to node %lld via node %lld.\n", adj_matrix->points[start].id, adj_matrix->points[end].id, adj_matrix->points[via].id);
         free(dist_start);
         free(dist_tmp);
         free(st);
@@ -712,11 +714,11 @@ void dijkstra_via(AdjacencyMatrix* adj_matrix, int start, int end, int via, int*
     }
 
     // Output the shortest path and distance
-    printf("The shortest distance from node %d to node %d via node %d is %lf.\n", start, end, via, dist_start[via] + dist_tmp[end]);
-    printf("The path is: %d", path[0]);
+    printf("The shortest distance from node %lld to node %lld via node %lld is %lf.\n", adj_matrix->points[start].id, adj_matrix->points[end].id, adj_matrix->points[via].id, dist_start[via] + dist_tmp[end]);
+    printf("The path is: %lld", adj_matrix->points[path[0]].id);
     for (int i = 1; i < len; i++) 
     {
-        printf("->%d", path[i]);
+        printf("->%lld", adj_matrix->points[path[i]].id);
     }
     printf("\n");
 

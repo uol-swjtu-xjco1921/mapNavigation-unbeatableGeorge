@@ -1,0 +1,27 @@
+
+Welcome to the Map Navigator! Here is an overview of the entire process:
+1. Choose your map
+2. Modify map properties (this modification will be added to the map file)
+3. Enter location information
+This will allow you to see a visualization of the map that meets your requirements!
+
+Please enter the map filename: 
+Map read successfully!
+
+Current map has 3941 points and 2344 edges, and has been edited 0 times.
+
+Do you want to modify the map properties?
+1. Yes
+2. No
+Enter your choice(1 or 2): 
+Please enter the ID of the starting point: Please enter the ID of the ending point: 
+Do you need to pass through a specific node or POI(point of interest) on the map?
+1. No need
+2. Need to pass through a node on the map
+3. Need to pass through a point of interest on the map
+Please enter your selection: 
+Do you want the shortest route or the fastest route?
+1. Shortest route
+2. Fastest route
+Enter your choice:The path: -8849->-8847->288976339->288976341->288976342->288976343->288976377->1562919320->41337068->1601134705->1601134795->31004252->31004251->54741756->41337058->1563622352->41337049->1563622351->41337047->41337044->57627860->1563529904->1563529900->41337031->247957031->247957030->319432030->247293201->1160269686->1160269507->247293200->-2450->247293202->-2538->247293190->247958727->247330380->1685591179->247958728->247330377->247293254->247293257->52905103->247293164->247293286->244449810->247957367->21069424->249661995->21069425->664212051->1659456320->1659456374->1659456407->664212050->21545949->1377189445->250221635->250221634->1659456358->1659456370->1659456361->1659456260->1659456355->1659456324
+ Total length: 1073.022002

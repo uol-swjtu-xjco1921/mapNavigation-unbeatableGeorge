@@ -1,0 +1,28 @@
+
+Welcome to the Map Navigator! Here is an overview of the entire process:
+1. Choose your map
+2. Modify map properties (this modification will be added to the map file)
+3. Enter location information
+This will allow you to see a visualization of the map that meets your requirements!
+
+Please enter the map filename: 
+Map read successfully!
+
+Current map has 3941 points and 2344 edges, and has been edited 0 times.
+
+Do you want to modify the map properties?
+1. Yes
+2. No
+Enter your choice(1 or 2): 
+Please enter the ID of the starting point: Please enter the ID of the ending point: 
+Do you need to pass through a specific node or POI(point of interest) on the map?
+1. No need
+2. Need to pass through a node on the map
+3. Need to pass through a point of interest on the map
+Please enter your selection: 
+Please enter the node ID you want to pass through: 
+Enter node ID: The node ID 2 does not exist! Please try again!
+
+Please enter the node ID you want to pass through: 
+Enter node ID: The shortest distance from node -8849 to node -2560 via node 1725582979 is 782.701128.
+The path is: -8849->-8847->288976338->288976346->-2436->288976405->288976337->31004230->1698087079->1152071963->26653414->26653413->26653412->354734659->31004260->31004261->354734656->31004262->31004263->1644773883->54060497->301382603->54060499->-2486->1150101838->54060595->1150101880->54060502->1668111635->54060506->54060510->54060547->54060551->1725582974->54060555->1725582979->54060555->1725582974->54060551->54060547->54060515->984231603->54060524->984231425->1187324690->1187324665->1187324678->1187324676->1187324692->1187324682->1187324670->-2560
